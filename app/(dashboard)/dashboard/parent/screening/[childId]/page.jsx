@@ -40,6 +40,7 @@ export default function ScreeningPage({ params }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingVideos, setUploadingVideos] = useState({});
 
+  // ✅ Only depend on childId — not router
   useEffect(() => {
     async function fetchChild() {
       try {
@@ -48,17 +49,16 @@ export default function ScreeningPage({ params }) {
         const found = children.find((c) => c.id === childId);
         if (!found) {
           toast.error("Child not found");
-          router.push("/dashboard/parent");
-          return;
+          return; // ← don't redirect, just stop
         }
         setChild(found);
       } catch {
         toast.error("Failed to load child data");
-        router.push("/dashboard/parent");
+        // ← don't redirect on error
       }
     }
     fetchChild();
-  }, [childId, router]);
+  }, [childId]); // ← removed router
 
   const questionnaire = (() => {
     if (!child) return null;
@@ -75,10 +75,7 @@ export default function ScreeningPage({ params }) {
     if (child && !questionnaire) {
       return (
         <div className="max-w-3xl mx-auto space-y-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/dashboard/parent")}
-          >
+          <Button variant="ghost" onClick={() => router.push("/dashboard/parent")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
@@ -92,7 +89,6 @@ export default function ScreeningPage({ params }) {
         </div>
       );
     }
-
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
@@ -108,10 +104,7 @@ export default function ScreeningPage({ params }) {
     currentSectionData.questions.every((q) => responses[q.id]);
 
   function handleAnswerChange(questionId, answer, points) {
-    setResponses({
-      ...responses,
-      [questionId]: { questionId, answer, points },
-    });
+    setResponses({ ...responses, [questionId]: { questionId, answer, points } });
   }
 
   function handleNextSection() {
@@ -164,7 +157,6 @@ export default function ScreeningPage({ params }) {
         publicId: data.public_id,
       };
 
-      // Replace if same category already uploaded
       setVideos((prev) => [
         ...prev.filter((v) => v.category !== category),
         metadata,
@@ -181,7 +173,6 @@ export default function ScreeningPage({ params }) {
   function calculateResults() {
     const allResponses = Object.values(responses);
     const totalScore = allResponses.reduce((sum, r) => sum + r.points, 0);
-
     const criticalItemsCount = allResponses.filter((r) => {
       const question = questionnaire.sections
         .flatMap((s) => s.questions)
@@ -190,52 +181,42 @@ export default function ScreeningPage({ params }) {
     }).length;
 
     let riskLevel = "low";
-    if (totalScore >= questionnaire.riskThresholds.high) {
-      riskLevel = "high";
-    } else if (totalScore >= questionnaire.riskThresholds.medium) {
-      riskLevel = "medium";
-    } else if (criticalItemsCount >= questionnaire.criticalItemsThreshold) {
-      riskLevel = "medium";
-    }
+    if (totalScore >= questionnaire.riskThresholds.high) riskLevel = "high";
+    else if (totalScore >= questionnaire.riskThresholds.medium) riskLevel = "medium";
+    else if (criticalItemsCount >= questionnaire.criticalItemsThreshold) riskLevel = "medium";
 
     return { responses: allResponses, totalScore, criticalItemsCount, riskLevel };
   }
 
   function getRecommendations(riskLevel) {
     switch (riskLevel) {
-      case "low":
-        return [
-          "Your child is showing typical developmental patterns",
-          "Continue regular developmental monitoring",
-          "You can repeat this screening in 3-6 months if desired",
-        ];
-      case "medium":
-        return [
-          "Some responses indicate areas to monitor",
-          "Discuss these results with your pediatrician",
-          "Consider repeating this screening in 1-2 months",
-          "Early intervention can be beneficial",
-        ];
-      case "high":
-        return [
-          "Multiple responses indicate need for further evaluation",
-          "Schedule an appointment with your pediatrician soon",
-          "Request a referral to a developmental specialist",
-          "Early intervention services can begin before formal diagnosis",
-        ];
+      case "low": return [
+        "Your child is showing typical developmental patterns",
+        "Continue regular developmental monitoring",
+        "You can repeat this screening in 3-6 months if desired",
+      ];
+      case "medium": return [
+        "Some responses indicate areas to monitor",
+        "Discuss these results with your pediatrician",
+        "Consider repeating this screening in 1-2 months",
+        "Early intervention can be beneficial",
+      ];
+      case "high": return [
+        "Multiple responses indicate need for further evaluation",
+        "Schedule an appointment with your pediatrician soon",
+        "Request a referral to a developmental specialist",
+        "Early intervention services can begin before formal diagnosis",
+      ];
     }
   }
 
   async function handleSubmit() {
     if (!user || !child) return;
-
     if (Object.values(uploadingVideos).some(Boolean)) {
       toast.error("Please wait for videos to finish uploading");
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const result = calculateResults();
       const screening = {
@@ -266,7 +247,6 @@ export default function ScreeningPage({ params }) {
       });
 
       if (!res.ok) throw new Error("Failed to submit");
-
       toast.success("Screening submitted successfully!");
       router.push(`/dashboard/parent/screening/result/${screening.id}`);
     } catch (err) {
@@ -281,23 +261,15 @@ export default function ScreeningPage({ params }) {
   if (currentSection < questionnaire.sections.length) {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/dashboard/parent")}
-        >
+        <Button variant="ghost" onClick={() => router.push("/dashboard/parent")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
         </Button>
-
         <div>
-          <h1 className="text-3xl font-bold mb-2">
-            Screening for {child.name}
-          </h1>
+          <h1 className="text-3xl font-bold mb-2">Screening for {child.name}</h1>
           <p className="text-gray-600">{questionnaire.name}</p>
         </div>
-
         <Progress value={progress} className="w-full" />
-
         <Card>
           <CardHeader>
             <CardTitle>{currentSectionData.title}</CardTitle>
@@ -309,42 +281,26 @@ export default function ScreeningPage({ params }) {
             {currentSectionData.questions.map((question, index) => (
               <div key={question.id} className="space-y-3">
                 <div className="flex items-start space-x-2">
-                  <span className="font-semibold text-gray-700">
-                    {index + 1}.
-                  </span>
+                  <span className="font-semibold text-gray-700">{index + 1}.</span>
                   <div className="flex-1">
                     <p className="text-gray-900">{question.text}</p>
                     {question.isCritical && (
-                      <Badge variant="outline" className="mt-2">
-                        Critical Item
-                      </Badge>
+                      <Badge variant="outline" className="mt-2">Critical Item</Badge>
                     )}
                   </div>
                 </div>
                 <RadioGroup
                   value={responses[question.id]?.answer}
                   onValueChange={(value) => {
-                    const option = question.options.find(
-                      (o) => o.value === value
-                    );
-                    if (option)
-                      handleAnswerChange(question.id, value, option.points);
+                    const option = question.options.find((o) => o.value === value);
+                    if (option) handleAnswerChange(question.id, value, option.points);
                   }}
                   className="ml-6"
                 >
                   {question.options.map((option) => (
-                    <div
-                      key={option.value}
-                      className="flex items-center space-x-2"
-                    >
-                      <RadioGroupItem
-                        value={option.value}
-                        id={`${question.id}-${option.value}`}
-                      />
-                      <Label
-                        htmlFor={`${question.id}-${option.value}`}
-                        className="cursor-pointer"
-                      >
+                    <div key={option.value} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option.value} id={`${question.id}-${option.value}`} />
+                      <Label htmlFor={`${question.id}-${option.value}`} className="cursor-pointer">
                         {option.label}
                       </Label>
                     </div>
@@ -354,22 +310,12 @@ export default function ScreeningPage({ params }) {
             ))}
           </CardContent>
         </Card>
-
         <div className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handlePreviousSection}
-            disabled={currentSection === 0}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
+          <Button variant="outline" onClick={handlePreviousSection} disabled={currentSection === 0}>
+            <ArrowLeft className="h-4 w-4 mr-2" />Previous
           </Button>
-          <Button
-            onClick={handleNextSection}
-            disabled={!isCurrentSectionComplete}
-          >
-            Next
-            <ArrowRight className="h-4 w-4 ml-2" />
+          <Button onClick={handleNextSection} disabled={!isCurrentSectionComplete}>
+            Next<ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>
@@ -379,62 +325,34 @@ export default function ScreeningPage({ params }) {
   // ── Video Upload Section ──
   const videoCategories = ["social", "play", "free"];
   const videoLabels = {
-    social: {
-      title: "Social Interaction Video",
-      desc: "30-60 seconds of your child interacting with you",
-    },
-    play: {
-      title: "Play Activity Video",
-      desc: "30-60 seconds of your child playing with toys",
-    },
-    free: {
-      title: "Free Play Video",
-      desc: "30-60 seconds of your child playing independently",
-    },
+    social: { title: "Social Interaction Video", desc: "30-60 seconds of your child interacting with you" },
+    play: { title: "Play Activity Video", desc: "30-60 seconds of your child playing with toys" },
+    free: { title: "Free Play Video", desc: "30-60 seconds of your child playing independently" },
   };
-
   const anyUploading = Object.values(uploadingVideos).some(Boolean);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <Button
-        variant="ghost"
-        onClick={() => setCurrentSection(currentSection - 1)}
-        disabled={anyUploading}
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Questions
+      <Button variant="ghost" onClick={() => setCurrentSection(currentSection - 1)} disabled={anyUploading}>
+        <ArrowLeft className="h-4 w-4 mr-2" />Back to Questions
       </Button>
-
       <div>
         <h1 className="text-3xl font-bold mb-2">Video Upload (Optional)</h1>
-        <p className="text-gray-600">
-          Upload videos to enhance screening accuracy
-        </p>
+        <p className="text-gray-600">Upload videos to enhance screening accuracy</p>
       </div>
-
       <Progress value={100} className="w-full" />
-
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Videos are optional but recommended. They help analyze behavioral
-          patterns more accurately using AI.
+          Videos are optional but recommended. They help analyze behavioral patterns more accurately using AI.
         </AlertDescription>
       </Alert>
-
       <div className="grid gap-6">
         {videoCategories.map((category) => {
           const isUploaded = videos.find((v) => v.category === category);
           const isUploading = uploadingVideos[category];
-
           return (
-            <Card
-              key={category}
-              className={`transition-all duration-300 ${
-                isUploaded ? "border-emerald-200 bg-emerald-50/30" : ""
-              }`}
-            >
+            <Card key={category} className={`transition-all duration-300 ${isUploaded ? "border-emerald-200 bg-emerald-50/30" : ""}`}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   {videoLabels[category].title}
@@ -448,76 +366,40 @@ export default function ScreeningPage({ params }) {
               </CardHeader>
               <CardContent>
                 {isUploading ? (
-                  // ── Uploading state ──
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3 text-violet-600">
                       <div className="w-5 h-5 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin flex-shrink-0" />
-                      <span className="text-sm font-medium">
-                        Uploading video to cloud...
-                      </span>
+                      <span className="text-sm font-medium">Uploading video to cloud...</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
                       <div className="h-1.5 rounded-full bg-violet-400 animate-pulse w-3/4" />
                     </div>
-                    <p className="text-xs text-gray-400">
-                      This may take a moment for large files. Please don&apos;t
-                      close the page.
-                    </p>
+                    <p className="text-xs text-gray-400">This may take a moment. Please don&apos;t close the page.</p>
                   </div>
                 ) : isUploaded ? (
-                  // ── Uploaded state ──
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 text-emerald-600">
                       <CheckCircle className="h-5 w-5 flex-shrink-0" />
                       <div>
-                        <p className="text-sm font-medium">
-                          Video uploaded successfully
-                        </p>
-                        <p className="text-xs text-gray-400 truncate max-w-xs">
-                          {isUploaded.name}
-                        </p>
+                        <p className="text-sm font-medium">Video uploaded successfully</p>
+                        <p className="text-xs text-gray-400 truncate max-w-xs">{isUploaded.name}</p>
                       </div>
                     </div>
                     <div>
-                      <input
-                        type="file"
-                        accept="video/mp4,video/webm,video/quicktime"
-                        onChange={(e) => handleVideoUpload(e, category)}
-                        className="hidden"
-                        id={`${category}-video-replace`}
-                      />
-                      <label
-                        htmlFor={`${category}-video-replace`}
-                        className="text-xs text-gray-400 hover:text-violet-600 cursor-pointer underline"
-                      >
-                        Replace
-                      </label>
+                      <input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={(e) => handleVideoUpload(e, category)} className="hidden" id={`${category}-video-replace`} />
+                      <label htmlFor={`${category}-video-replace`} className="text-xs text-gray-400 hover:text-violet-600 cursor-pointer underline">Replace</label>
                     </div>
                   </div>
                 ) : (
-                  // ── Default upload state ──
                   <div>
-                    <input
-                      type="file"
-                      accept="video/mp4,video/webm,video/quicktime"
-                      onChange={(e) => handleVideoUpload(e, category)}
-                      className="hidden"
-                      id={`${category}-video`}
-                    />
-                    <label
-                      htmlFor={`${category}-video`}
-                      className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-gray-200 hover:border-violet-400 hover:bg-violet-50 cursor-pointer transition-all group"
-                    >
+                    <input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={(e) => handleVideoUpload(e, category)} className="hidden" id={`${category}-video`} />
+                    <label htmlFor={`${category}-video`} className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-gray-200 hover:border-violet-400 hover:bg-violet-50 cursor-pointer transition-all group">
                       <div className="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-violet-100 flex items-center justify-center transition-all">
                         <Upload className="h-5 w-5 text-gray-400 group-hover:text-violet-500 transition-all" />
                       </div>
                       <div className="text-center">
-                        <p className="text-sm font-medium text-gray-600 group-hover:text-violet-600">
-                          Click to upload video
-                        </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          MP4, WebM, MOV up to 100MB
-                        </p>
+                        <p className="text-sm font-medium text-gray-600 group-hover:text-violet-600">Click to upload video</p>
+                        <p className="text-xs text-gray-400 mt-0.5">MP4, WebM, MOV up to 100MB</p>
                       </div>
                     </label>
                   </div>
@@ -527,14 +409,8 @@ export default function ScreeningPage({ params }) {
           );
         })}
       </div>
-
-      {/* Submit buttons */}
       <div className="flex justify-end space-x-4">
-        <Button
-          variant="outline"
-          onClick={handleSubmit}
-          disabled={isSubmitting || anyUploading}
-        >
+        <Button variant="outline" onClick={handleSubmit} disabled={isSubmitting || anyUploading}>
           Skip Videos &amp; Submit
         </Button>
         <Button onClick={handleSubmit} disabled={isSubmitting || anyUploading}>
