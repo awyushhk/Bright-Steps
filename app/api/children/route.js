@@ -6,7 +6,11 @@ export async function GET() {
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
   const children = await getChildrenByParent(userId);
-  return Response.json(children);
+  return Response.json(children, {
+    headers: {
+      'Cache-Control': 'private, max-age=10, stale-while-revalidate=30',
+    },
+  });
 }
 
 export async function POST(request) {

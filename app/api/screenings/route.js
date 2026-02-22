@@ -100,7 +100,9 @@ export async function GET(request) {
   }
 
   const screenings = await getScreeningsByParent(userId);
-  return Response.json(screenings);
+  return Response.json(screenings, {
+    headers: { 'Cache-Control': 'private, max-age=10, stale-while-revalidate=30' },
+  });
 }
 
 export async function POST(request) {

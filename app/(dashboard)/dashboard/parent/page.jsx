@@ -40,6 +40,50 @@ import {
 import { toast } from "sonner";
 import { calculateAge } from "@/lib/utils";
 
+// ── Skeleton primitives ──
+function Skeleton({ className }) {
+  return <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />;
+}
+
+function StatCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-4 rounded-full" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-12" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function ChildCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-6 w-20 rounded-full" />
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-4 w-36" />
+        <div className="pt-4 flex space-x-2">
+          <Skeleton className="h-9 flex-1 rounded-md" />
+          <Skeleton className="h-9 w-28 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-md" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ParentDashboard() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
@@ -47,6 +91,7 @@ export default function ParentDashboard() {
   const [children, setChildren] = useState([]);
   const [screenings, setScreenings] = useState({});
   const [isAddingChild, setIsAddingChild] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [newChild, setNewChild] = useState({
     name: "",
     dateOfBirth: "",
@@ -60,6 +105,7 @@ export default function ParentDashboard() {
   }, [isLoaded]); // ← removed user
 
   async function loadData() {
+    setDataLoading(true);
     try {
       const res = await fetch("/api/children");
       const childList = await res.json();
@@ -75,6 +121,8 @@ export default function ParentDashboard() {
       setScreenings(screeningsMap);
     } catch (err) {
       console.error("Failed to load data:", err);
+    } finally {
+      setDataLoading(false);
     }
   }
 
@@ -145,41 +193,51 @@ export default function ParentDashboard() {
         </p>
       </div>
 
-      {/* Stats */}
+      {/* Stats — skeleton while loading */}
       <div className="grid md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Children</CardTitle>
-            <User className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{children.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Screenings</CardTitle>
-            <ClipboardList className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Object.values(screenings).reduce((sum, s) => sum + s.length, 0)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-            <AlertCircle className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Object.values(screenings).reduce(
-                (sum, s) => sum + s.filter((sc) => sc.status === "submitted").length, 0
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {dataLoading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          <>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Children</CardTitle>
+                <User className="h-4 w-4 text-gray-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{children.length}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Screenings</CardTitle>
+                <ClipboardList className="h-4 w-4 text-gray-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {Object.values(screenings).reduce((sum, s) => sum + s.length, 0)}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+                <AlertCircle className="h-4 w-4 text-gray-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {Object.values(screenings).reduce(
+                    (sum, s) => sum + s.filter((sc) => sc.status === "submitted").length, 0
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Add Child */}
@@ -242,8 +300,13 @@ export default function ParentDashboard() {
         </Dialog>
       </div>
 
-      {/* Children List */}
-      {children.length === 0 ? (
+      {/* Children List — skeleton while loading */}
+      {dataLoading ? (
+        <div className="grid md:grid-cols-2 gap-6">
+          <ChildCardSkeleton />
+          <ChildCardSkeleton />
+        </div>
+      ) : children.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <User className="h-16 w-16 text-gray-400 mb-4" />
@@ -292,6 +355,7 @@ export default function ParentDashboard() {
                   <div className="pt-4 flex space-x-2">
                     <Button
                       className="flex-1"
+                      onMouseEnter={() => router.prefetch(`/dashboard/parent/screening/${child.id}`)}
                       onClick={() => router.push(`/dashboard/parent/screening/${child.id}`)}
                     >
                       New Screening
@@ -299,6 +363,7 @@ export default function ParentDashboard() {
                     {childScreenings.length > 0 && (
                       <Button
                         variant="outline"
+                        onMouseEnter={() => router.prefetch(`/dashboard/parent/screening/result/${latestScreening.id}`)}
                         onClick={() => router.push(`/dashboard/parent/screening/result/${latestScreening.id}`)}
                       >
                         View Latest
