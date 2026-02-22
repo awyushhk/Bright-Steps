@@ -42,7 +42,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-24">
         <div className="text-center max-w-3xl mx-auto mb-24">
            <p className="text-sm font-medium text-indigo-600 mb-4 tracking-wide uppercase -mt-10">
-    AI-Enabled Decision Support Platform for Early Autism Screening
+    AI-Enabled Decision Support Platform for Early Detection of Autism
   </p>
           <h2 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
             Small Signs Today.

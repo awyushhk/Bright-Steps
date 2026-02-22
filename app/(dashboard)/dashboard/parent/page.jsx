@@ -53,10 +53,11 @@ export default function ParentDashboard() {
     gender: "male",
   });
 
+  // ✅ Only depend on isLoaded — not user (user object changes reference every render)
   useEffect(() => {
     if (!isLoaded || !user) return;
     loadData();
-  }, [isLoaded, user]);
+  }, [isLoaded]); // ← removed user
 
   async function loadData() {
     try {
@@ -69,7 +70,7 @@ export default function ParentDashboard() {
         childList.map(async (child) => {
           const sRes = await fetch(`/api/screenings?childId=${child.id}`);
           screeningsMap[child.id] = await sRes.json();
-        }),
+        })
       );
       setScreenings(screeningsMap);
     } catch (err) {
@@ -82,39 +83,29 @@ export default function ParentDashboard() {
       toast.error("Please fill in all fields");
       return;
     }
-
     try {
       const res = await fetch("/api/children", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newChild),
       });
-
       if (!res.ok) throw new Error("Failed to add child");
-
       const child = await res.json();
       setChildren([...children, child]);
       setScreenings({ ...screenings, [child.id]: [] });
       setNewChild({ name: "", dateOfBirth: "", gender: "male" });
       setIsAddingChild(false);
       toast.success(`${child.name} added successfully`);
-    } catch (err) {
+    } catch {
       toast.error("Failed to add child");
     }
   }
 
   async function handleDeleteChild(childId, childName) {
-    if (
-      !confirm(
-        `Are you sure you want to delete ${childName}? This will also delete all their screenings.`,
-      )
-    )
-      return;
-
+    if (!confirm(`Are you sure you want to delete ${childName}? This will also delete all their screenings.`)) return;
     try {
       const res = await fetch(`/api/children/${childId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
-
       setChildren(children.filter((c) => c.id !== childId));
       const updated = { ...screenings };
       delete updated[childId];
@@ -127,14 +118,10 @@ export default function ParentDashboard() {
 
   const getRiskBadgeColor = (level) => {
     switch (level) {
-      case "low":
-        return "bg-green-100 text-green-800";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800";
-      case "high":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "low": return "bg-green-100 text-green-800";
+      case "medium": return "bg-yellow-100 text-yellow-800";
+      case "high": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -162,21 +149,16 @@ export default function ParentDashboard() {
       <div className="grid md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Children
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Children</CardTitle>
             <User className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{children.length}</div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Screenings
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Screenings</CardTitle>
             <ClipboardList className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
@@ -185,20 +167,15 @@ export default function ParentDashboard() {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Reviews
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
             <AlertCircle className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {Object.values(screenings).reduce(
-                (sum, s) =>
-                  sum + s.filter((sc) => sc.status === "submitted").length,
-                0,
+                (sum, s) => sum + s.filter((sc) => sc.status === "submitted").length, 0
               )}
             </div>
           </CardContent>
@@ -218,9 +195,7 @@ export default function ParentDashboard() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Child</DialogTitle>
-              <DialogDescription>
-                Add a child to start developmental screening
-              </DialogDescription>
+              <DialogDescription>Add a child to start developmental screening</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -229,9 +204,7 @@ export default function ParentDashboard() {
                   id="name"
                   placeholder="Enter name"
                   value={newChild.name}
-                  onChange={(e) =>
-                    setNewChild({ ...newChild, name: e.target.value })
-                  }
+                  onChange={(e) => setNewChild({ ...newChild, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -240,9 +213,7 @@ export default function ParentDashboard() {
                   id="dob"
                   type="date"
                   value={newChild.dateOfBirth}
-                  onChange={(e) =>
-                    setNewChild({ ...newChild, dateOfBirth: e.target.value })
-                  }
+                  onChange={(e) => setNewChild({ ...newChild, dateOfBirth: e.target.value })}
                   max={new Date().toISOString().split("T")[0]}
                 />
               </div>
@@ -250,9 +221,7 @@ export default function ParentDashboard() {
                 <Label htmlFor="gender">Gender</Label>
                 <Select
                   value={newChild.gender}
-                  onValueChange={(value) =>
-                    setNewChild({ ...newChild, gender: value })
-                  }
+                  onValueChange={(value) => setNewChild({ ...newChild, gender: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -266,9 +235,7 @@ export default function ParentDashboard() {
               </div>
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsAddingChild(false)}>
-                Cancel
-              </Button>
+              <Button variant="outline" onClick={() => setIsAddingChild(false)}>Cancel</Button>
               <Button onClick={handleAddChild}>Add Child</Button>
             </div>
           </DialogContent>
@@ -280,12 +247,8 @@ export default function ParentDashboard() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <User className="h-16 w-16 text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-2">
-              No children added yet
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Add a child to start developmental screening
-            </p>
+            <h3 className="text-xl font-semibold mb-2">No children added yet</h3>
+            <p className="text-gray-500 mb-4">Add a child to start developmental screening</p>
             <Button onClick={() => setIsAddingChild(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Your First Child
@@ -307,18 +270,12 @@ export default function ParentDashboard() {
                       <CardTitle className="text-xl">{child.name}</CardTitle>
                       <CardDescription className="mt-1">
                         {age.display} •{" "}
-                        {child.gender.charAt(0).toUpperCase() +
-                          child.gender.slice(1)}
+                        {child.gender.charAt(0).toUpperCase() + child.gender.slice(1)}
                       </CardDescription>
                     </div>
                     {latestScreening?.riskAssessment && (
-                      <Badge
-                        className={getRiskBadgeColor(
-                          latestScreening.riskAssessment.level,
-                        )}
-                      >
-                        {latestScreening.riskAssessment.level.toUpperCase()}{" "}
-                        Risk
+                      <Badge className={getRiskBadgeColor(latestScreening.riskAssessment.level)}>
+                        {latestScreening.riskAssessment.level.toUpperCase()} Risk
                       </Badge>
                     )}
                   </div>
@@ -330,26 +287,19 @@ export default function ParentDashboard() {
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <ClipboardList className="h-4 w-4 mr-2" />
-                    {childScreenings.length} screening
-                    {childScreenings.length !== 1 ? "s" : ""} completed
+                    {childScreenings.length} screening{childScreenings.length !== 1 ? "s" : ""} completed
                   </div>
                   <div className="pt-4 flex space-x-2">
                     <Button
                       className="flex-1"
-                      onClick={() =>
-                        router.push(`/dashboard/parent/screening/${child.id}`)
-                      }
+                      onClick={() => router.push(`/dashboard/parent/screening/${child.id}`)}
                     >
                       New Screening
                     </Button>
                     {childScreenings.length > 0 && (
                       <Button
                         variant="outline"
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/parent/screening/result/${latestScreening.id}`,
-                          )
-                        }
+                        onClick={() => router.push(`/dashboard/parent/screening/result/${latestScreening.id}`)}
                       >
                         View Latest
                       </Button>
