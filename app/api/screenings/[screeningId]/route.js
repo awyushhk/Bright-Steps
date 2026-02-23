@@ -1,26 +1,26 @@
-// app/api/screenings/[screeningId]/route.js
-
 import { auth } from '@clerk/nextjs/server';
-import { getScreeningById, updateScreening } from '@/lib/queries';
+import { getScreeningById, getScreeningWithChild, updateScreening } from '@/lib/queries';
 
 export async function GET(request, { params }) {
   const { userId } = await auth();
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { screeningId } = await params; // await params
+  const { screeningId } = await params;
 
-  const screening = await getScreeningById(screeningId);
+  // Use JOIN query so clinician gets child info too
+  const screening = await getScreeningWithChild(screeningId);
   if (!screening) return Response.json({ error: 'Not found' }, { status: 404 });
 
-  return Response.json(screening);
+  return Response.json(screening, {
+    headers: { 'Cache-Control': 'private, max-age=10, stale-while-revalidate=30' },
+  });
 }
 
 export async function PATCH(request, { params }) {
   const { userId } = await auth();
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { screeningId } = await params; // await params
-
+  const { screeningId } = await params;
   const body = await request.json();
   await updateScreening(screeningId, body);
   return Response.json({ success: true });
