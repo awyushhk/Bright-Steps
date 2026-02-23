@@ -91,12 +91,16 @@ export async function GET(request) {
 
   if (all === "true" && role === "clinician") {
     const screenings = await getAllSubmittedScreenings();
-    return Response.json(screenings);
+  return Response.json(screenings, {
+    headers: { 'Cache-Control': 'private, max-age=10, stale-while-revalidate=30' },
+  });
   }
 
   if (childId) {
     const screenings = await getScreeningsByChild(childId);
-    return Response.json(screenings);
+    return Response.json(screenings, {
+    headers: { 'Cache-Control': 'private, max-age=10, stale-while-revalidate=30' },
+  });
   }
 
   const screenings = await getScreeningsByParent(userId);
