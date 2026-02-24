@@ -30,15 +30,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus,
-  User,
-  Calendar,
-  ClipboardList,
-  AlertCircle,
-  Trash2,
+  Plus, User, Calendar, ClipboardList, AlertCircle,
+  Trash2, CheckCircle, Activity, Stethoscope, Eye,
 } from "lucide-react";
 import { toast } from "sonner";
-import { calculateAge } from "@/lib/utils";
+import { calculateAge, formatDate } from "@/lib/utils";
 
 // ── Skeleton primitives ──
 function Skeleton({ className }) {
@@ -84,6 +80,43 @@ function ChildCardSkeleton() {
   );
 }
 
+// ── Clinician action config ──
+const ACTION_CONFIG = {
+  referral: {
+    label: "Refer to Specialist",
+    desc: "Your child has been referred for immediate specialist evaluation. Please contact your healthcare provider to schedule an appointment as soon as possible.",
+    icon: Stethoscope,
+    cardBorder: "border-rose-200",
+    bg: "bg-rose-50 border-rose-200",
+    iconColor: "text-rose-600",
+    textColor: "text-rose-800",
+    badge: "bg-rose-100 text-rose-700",
+    noteBorder: "border-rose-200/60",
+  },
+  monitoring: {
+    label: "Continue Monitoring",
+    desc: "A follow-up screening has been recommended in 3–6 months. Continue observing your child's development at home.",
+    icon: Activity,
+    cardBorder: "border-amber-200",
+    bg: "bg-amber-50 border-amber-200",
+    iconColor: "text-amber-600",
+    textColor: "text-amber-800",
+    badge: "bg-amber-100 text-amber-700",
+    noteBorder: "border-amber-200/60",
+  },
+  routine: {
+    label: "Routine Follow-up",
+    desc: "No immediate concerns identified. Continue with standard developmental checks at your next regular visit.",
+    icon: CheckCircle,
+    cardBorder: "border-emerald-200",
+    bg: "bg-emerald-50 border-emerald-200",
+    iconColor: "text-emerald-600",
+    textColor: "text-emerald-800",
+    badge: "bg-emerald-100 text-emerald-700",
+    noteBorder: "border-emerald-200/60",
+  },
+};
+
 export default function ParentDashboard() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
@@ -98,11 +131,10 @@ export default function ParentDashboard() {
     gender: "male",
   });
 
-  // ✅ Only depend on isLoaded — not user (user object changes reference every render)
   useEffect(() => {
     if (!isLoaded || !user) return;
     loadData();
-  }, [isLoaded]); // ← removed user
+  }, [isLoaded]);
 
   async function loadData() {
     setDataLoading(true);
@@ -116,7 +148,7 @@ export default function ParentDashboard() {
         childList.map(async (child) => {
           const sRes = await fetch(`/api/screenings?childId=${child.id}`);
           screeningsMap[child.id] = await sRes.json();
-        })
+        }),
       );
       setScreenings(screeningsMap);
     } catch (err) {
@@ -166,10 +198,10 @@ export default function ParentDashboard() {
 
   const getRiskBadgeColor = (level) => {
     switch (level) {
-      case "low": return "bg-green-100 text-green-800";
+      case "low":    return "bg-green-100 text-green-800";
       case "medium": return "bg-yellow-100 text-yellow-800";
-      case "high": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "high":   return "bg-red-100 text-red-800";
+      default:       return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -193,14 +225,10 @@ export default function ParentDashboard() {
         </p>
       </div>
 
-      {/* Stats — skeleton while loading */}
+      {/* Stats */}
       <div className="grid md:grid-cols-3 gap-6">
         {dataLoading ? (
-          <>
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-          </>
+          <><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /></>
         ) : (
           <>
             <Card>
@@ -225,22 +253,23 @@ export default function ParentDashboard() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-                <AlertCircle className="h-4 w-4 text-gray-500" />
+                <CardTitle className="text-sm font-medium">High Risk Alerts</CardTitle>
+                <AlertCircle className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {Object.values(screenings).reduce(
-                    (sum, s) => sum + s.filter((sc) => sc.status === "submitted").length, 0
-                  )}
+                  {Object.values(screenings).filter(
+                    (s) => s[0]?.riskAssessment?.level === "high"
+                  ).length}
                 </div>
+                <p className="text-xs text-gray-500 mt-1">children flagged high risk</p>
               </CardContent>
             </Card>
           </>
         )}
       </div>
 
-      {/* Add Child */}
+      {/* Add Child header */}
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-bold">Your Children</h3>
         <Dialog open={isAddingChild} onOpenChange={setIsAddingChild}>
@@ -281,9 +310,7 @@ export default function ParentDashboard() {
                   value={newChild.gender}
                   onValueChange={(value) => setNewChild({ ...newChild, gender: value })}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="male">Male</SelectItem>
                     <SelectItem value="female">Female</SelectItem>
@@ -300,7 +327,7 @@ export default function ParentDashboard() {
         </Dialog>
       </div>
 
-      {/* Children List — skeleton while loading */}
+      {/* Children List */}
       {dataLoading ? (
         <div className="grid md:grid-cols-2 gap-6">
           <ChildCardSkeleton />
@@ -325,24 +352,39 @@ export default function ParentDashboard() {
             const latestScreening = childScreenings[0];
             const age = calculateAge(child.dateOfBirth);
 
+            const clinicianReview = latestScreening?.clinicianReview;
+            const isActioned = latestScreening?.status === "actioned" && clinicianReview?.action;
+            const actionCfg = isActioned ? ACTION_CONFIG[clinicianReview.action] : null;
+            const ActionIcon = actionCfg?.icon;
+
             return (
-              <Card key={child.id}>
+              <Card
+                key={child.id}
+                className={`border-2 transition-colors ${isActioned && actionCfg ? actionCfg.cardBorder : "border-transparent"}`}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-xl">{child.name}</CardTitle>
                       <CardDescription className="mt-1">
-                        {age.display} •{" "}
-                        {child.gender.charAt(0).toUpperCase() + child.gender.slice(1)}
+                        {age.display} • {child.gender.charAt(0).toUpperCase() + child.gender.slice(1)}
                       </CardDescription>
                     </div>
-                    {latestScreening?.riskAssessment && (
-                      <Badge className={getRiskBadgeColor(latestScreening.riskAssessment.level)}>
-                        {latestScreening.riskAssessment.level.toUpperCase()} Risk
-                      </Badge>
-                    )}
+                    <div className="flex flex-col items-end gap-1.5">
+                      {latestScreening?.riskAssessment && (
+                        <Badge className={getRiskBadgeColor(latestScreening.riskAssessment.level)}>
+                          {latestScreening.riskAssessment.level.toUpperCase()} Risk
+                        </Badge>
+                      )}
+                      {isActioned && actionCfg && (
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${actionCfg.badge}`}>
+                          ✓ Clinician Reviewed
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
+
                 <CardContent className="space-y-4">
                   <div className="flex items-center text-sm text-gray-600">
                     <Calendar className="h-4 w-4 mr-2" />
@@ -352,7 +394,51 @@ export default function ParentDashboard() {
                     <ClipboardList className="h-4 w-4 mr-2" />
                     {childScreenings.length} screening{childScreenings.length !== 1 ? "s" : ""} completed
                   </div>
-                  <div className="pt-4 flex space-x-2">
+
+                  {/* ── Clinician Decision Banner ── */}
+                  {isActioned && actionCfg && ActionIcon && (
+                    <div className={`rounded-xl border p-4 ${actionCfg.bg}`}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <ActionIcon className={`h-4 w-4 flex-shrink-0 ${actionCfg.iconColor}`} />
+                        <span className={`text-sm font-bold ${actionCfg.textColor}`}>
+                          Clinical Decision: {actionCfg.label}
+                        </span>
+                      </div>
+                      <p className={`text-xs leading-relaxed ${actionCfg.textColor} opacity-80 mb-2`}>
+                        {actionCfg.desc}
+                      </p>
+                      {clinicianReview.notes && (
+                        <div className={`mt-2 pt-2 border-t ${actionCfg.noteBorder}`}>
+                          <p className={`text-xs font-semibold mb-0.5 ${actionCfg.textColor} opacity-70`}>
+                            Clinician Notes:
+                          </p>
+                          <p className={`text-xs leading-relaxed ${actionCfg.textColor} opacity-75 line-clamp-3`}>
+                            {clinicianReview.notes}
+                          </p>
+                        </div>
+                      )}
+                      {clinicianReview.reviewedAt && (
+                        <p className={`text-xs mt-2 ${actionCfg.textColor} opacity-50`}>
+                          Reviewed on {formatDate(clinicianReview.reviewedAt)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── Awaiting review notice ── */}
+                  {latestScreening && !isActioned && ["submitted", "under_review"].includes(latestScreening.status) && (
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                      <p className="text-xs text-blue-700 font-medium">
+                        {latestScreening.status === "under_review"
+                          ? "A clinician is currently reviewing this screening."
+                          : "Screening submitted — awaiting clinician review."}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="pt-2 flex space-x-2">
                     <Button
                       className="flex-1"
                       onMouseEnter={() => router.prefetch(`/dashboard/parent/screening/${child.id}`)}

@@ -13,7 +13,6 @@ import {
   Clock,
   CheckCircle,
   Search,
-  Video,
   Activity,
   ChevronRight,
   Flame,
@@ -123,38 +122,38 @@ export default function ClinicianDashboard() {
   }, [isLoaded]);
 
   async function loadScreenings() {
-  setLoading(true);
-  try {
-    const res = await fetch("/api/screenings?all=true");
-    if (!res.ok) throw new Error();
-    const data = await res.json();
+    setLoading(true);
+    try {
+      const res = await fetch("/api/screenings?all=true");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
 
-    // Sort all by date newest first
-    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      // Sort all by date newest first
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    // Keep only latest screening per child
-    const seen = new Set();
-    const latest = data.filter(s => {
-      if (seen.has(s.childId)) return false;
-      seen.add(s.childId);
-      return true;
-    });
+      // Keep only latest screening per child
+      const seen = new Set();
+      const latest = data.filter((s) => {
+        if (seen.has(s.childId)) return false;
+        seen.add(s.childId);
+        return true;
+      });
 
-    // Then sort those by risk level
-    const order = { high: 3, medium: 2, low: 1 };
-    latest.sort((a, b) => {
-      const aR = order[a.riskAssessment?.level] ?? 0;
-      const bR = order[b.riskAssessment?.level] ?? 0;
-      return bR - aR;
-    });
+      // Then sort by risk level
+      const order = { high: 3, medium: 2, low: 1 };
+      latest.sort((a, b) => {
+        const aR = order[a.riskAssessment?.level] ?? 0;
+        const bR = order[b.riskAssessment?.level] ?? 0;
+        return bR - aR;
+      });
 
-    setScreenings(latest);
-  } catch {
-    toast.error("Failed to load screenings");
-  } finally {
-    setLoading(false);
+      setScreenings(latest);
+    } catch {
+      toast.error("Failed to load screenings");
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   async function markUnderReview(screeningId) {
     setUpdatingId(screeningId);
@@ -178,7 +177,6 @@ export default function ClinicianDashboard() {
     }
   }
 
-  // Stats
   const stats = {
     total: screenings.length,
     pending: screenings.filter((s) =>
@@ -189,7 +187,6 @@ export default function ClinicianDashboard() {
     actioned: screenings.filter((s) => s.status === "actioned").length,
   };
 
-  // Filtered list
   const filtered = screenings.filter((s) => {
     const tabMatch =
       activeTab === "all"
@@ -210,14 +207,6 @@ export default function ClinicianDashboard() {
 
     return tabMatch && searchMatch;
   });
-
-  if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-slate-700 animate-spin" />
-      </div>
-    );
-  }
 
   const doctorName =
     user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0];
@@ -253,30 +242,10 @@ export default function ClinicianDashboard() {
         {/* Stats */}
         <div className="relative mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            {
-              label: "Total Cases",
-              value: stats.total,
-              icon: ClipboardList,
-              color: "text-white",
-            },
-            {
-              label: "Pending Review",
-              value: stats.pending,
-              icon: Clock,
-              color: "text-amber-300",
-            },
-            {
-              label: "High Risk",
-              value: stats.highRisk,
-              icon: Flame,
-              color: "text-rose-300",
-            },
-            {
-              label: "Actioned",
-              value: stats.actioned,
-              icon: CheckCircle,
-              color: "text-emerald-300",
-            },
+            { label: "Total Cases",    value: stats.total,    icon: ClipboardList, color: "text-white"       },
+            { label: "Pending Review", value: stats.pending,  icon: Clock,         color: "text-amber-300"   },
+            { label: "High Risk",      value: stats.highRisk, icon: Flame,         color: "text-rose-300"    },
+            { label: "Actioned",       value: stats.actioned, icon: CheckCircle,   color: "text-emerald-300" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
@@ -296,7 +265,7 @@ export default function ClinicianDashboard() {
         </div>
       </div>
 
-      {/* ── Search + Analytics nav ── */}
+      {/* ── Search + Analytics ── */}
       <div className="flex items-center gap-3">
         <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -335,7 +304,7 @@ export default function ClinicianDashboard() {
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-6 space-y-4">
-          {/* Loading state */}
+          {/* Loading */}
           {loading && (
             <>
               <CaseSkeleton />
@@ -344,18 +313,14 @@ export default function ClinicianDashboard() {
             </>
           )}
 
-          {/* Empty state */}
+          {/* Empty */}
           {!loading && filtered.length === 0 && (
             <Card className="border-2 border-dashed border-gray-200 rounded-2xl">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <ClipboardList className="h-12 w-12 text-gray-300 mb-3" />
-                <h3 className="font-semibold text-gray-700 mb-1">
-                  No cases found
-                </h3>
+                <h3 className="font-semibold text-gray-700 mb-1">No cases found</h3>
                 <p className="text-gray-400 text-sm">
-                  {searchQuery
-                    ? "Try a different search"
-                    : "No cases in this category yet"}
+                  {searchQuery ? "Try a different search" : "No cases in this category yet"}
                 </p>
               </CardContent>
             </Card>
@@ -373,7 +338,7 @@ export default function ClinicianDashboard() {
                   className={`border-l-4 ${risk.borderL} rounded-2xl hover:shadow-md transition-shadow duration-200`}
                 >
                   <CardContent className="p-5">
-                    {/* Header row */}
+                    {/* Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -381,17 +346,10 @@ export default function ClinicianDashboard() {
                             {screening.childName || "Unknown"}
                           </h3>
                           <p className="text-gray-400 text-xs font-mono">
-                            #
-                            {screening.id
-                              ?.replace("screening-", "")
-                              .slice(0, 8)
-                              .toUpperCase()}
+                            #{screening.id?.replace("screening-", "").slice(0, 8).toUpperCase()}
                             {screening.childDob && (
                               <span className="font-sans ml-2 text-gray-400">
-                                • DOB:{" "}
-                                {new Date(
-                                  screening.childDob,
-                                ).toLocaleDateString()}
+                                • DOB: {new Date(screening.childDob).toLocaleDateString()}
                               </span>
                             )}
                           </p>
@@ -399,24 +357,15 @@ export default function ClinicianDashboard() {
                         </div>
                         <p className="text-gray-400 text-xs">
                           {screening.submittedAt || screening.createdAt
-                            ? formatDate(
-                                screening.submittedAt ?? screening.createdAt,
-                              )
+                            ? formatDate(screening.submittedAt ?? screening.createdAt)
                             : "—"}
                         </p>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${risk.badge}`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${risk.dot}`}
-                          />
-                          {(
-                            screening.riskAssessment?.level ?? "unknown"
-                          ).toUpperCase()}{" "}
-                          RISK
+                        <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${risk.badge}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${risk.dot}`} />
+                          {(screening.riskAssessment?.level ?? "unknown").toUpperCase()} RISK
                         </span>
                         {screening.riskAssessment?.combinedScore != null && (
                           <span className="text-sm font-bold text-gray-700 bg-gray-100 px-2.5 py-1.5 rounded-xl">
@@ -429,47 +378,22 @@ export default function ClinicianDashboard() {
                     {/* Info grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                       {[
-                        {
-                          label: "Q Score",
-                          value:
-                            screening.questionnaireScore != null
-                              ? `${screening.questionnaireScore}/15`
-                              : "—",
-                        },
-                        {
-                          label: "Responses",
-                          value: `${screening.questionnaireResponses?.length ?? 0} answered`,
-                        },
-                        {
-                          label: "Videos",
-                          value: hasVideos
-                            ? `${screening.videos.length} uploaded`
-                            : "None",
-                        },
-                        {
-                          label: "AI Analysis",
-                          value: screening.riskAssessment?.videoIndicators
-                            ? "✓ Available"
-                            : "Q-only",
-                        },
+                        { label: "Q Score",     value: screening.questionnaireScore != null ? `${screening.questionnaireScore}/15` : "—" },
+                        { label: "Responses",   value: `${screening.questionnaireResponses?.length ?? 0} answered` },
+                        { label: "Videos",      value: hasVideos ? `${screening.videos.length} uploaded` : "None" },
+                        { label: "AI Analysis", value: screening.riskAssessment?.videoIndicators ? "✓ Available" : "Q-only" },
                       ].map(({ label, value }) => (
                         <div key={label} className="bg-gray-50 rounded-xl p-3">
-                          <p className="text-gray-400 text-xs mb-0.5">
-                            {label}
-                          </p>
-                          <p className="font-semibold text-gray-800 text-sm">
-                            {value}
-                          </p>
+                          <p className="text-gray-400 text-xs mb-0.5">{label}</p>
+                          <p className="font-semibold text-gray-800 text-sm">{value}</p>
                         </div>
                       ))}
                     </div>
 
-                    {/* AI Summary preview */}
+                    {/* AI Summary */}
                     {screening.riskAssessment?.explanation && (
                       <div className="mb-4 p-3 rounded-xl bg-violet-50 border border-violet-100">
-                        <p className="text-xs font-semibold text-violet-600 mb-1">
-                          AI Summary
-                        </p>
+                        <p className="text-xs font-semibold text-violet-600 mb-1">AI Summary</p>
                         <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">
                           {screening.riskAssessment.explanation}
                         </p>
@@ -480,11 +404,7 @@ export default function ClinicianDashboard() {
                     <div className="flex gap-2">
                       <Button
                         className="flex-1 bg-slate-800 hover:bg-slate-900 text-white rounded-xl gap-1.5 text-sm"
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/clinician/case/${screening.id}`,
-                          )
-                        }
+                        onClick={() => router.push(`/dashboard/clinician/case/${screening.id}`)}
                       >
                         Review Case <ChevronRight className="h-3.5 w-3.5" />
                       </Button>
@@ -495,9 +415,7 @@ export default function ClinicianDashboard() {
                           disabled={updatingId === screening.id}
                           onClick={() => markUnderReview(screening.id)}
                         >
-                          {updatingId === screening.id
-                            ? "Updating…"
-                            : "Start Review"}
+                          {updatingId === screening.id ? "Updating…" : "Start Review"}
                         </Button>
                       )}
                     </div>
