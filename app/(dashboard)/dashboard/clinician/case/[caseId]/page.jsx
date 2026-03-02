@@ -38,6 +38,7 @@ import {
 import { toast } from "sonner";
 import { ChevronRight } from "lucide-react";
 import { calculateAge, formatDate } from "@/lib/utils";
+import TherapyPlanTab from "./TherapyPlanTab";
 
 // ── Skeleton ──
 function Skeleton({ className }) {
@@ -363,10 +364,9 @@ export default function CaseReviewPage({ params }) {
             {screening.childGender
               ? ` • ${screening.childGender.charAt(0).toUpperCase() + screening.childGender.slice(1)}`
               : ""}{" "}
-            • Case ID: {screening.id
-                              ?.replace("screening-", "")
-                              .slice(0, 8)
-                              .toUpperCase()} • Submitted{" "}
+            • Case ID:{" "}
+            {screening.id?.replace("screening-", "").slice(0, 8).toUpperCase()}{" "}
+            • Submitted{" "}
             {formatDate(screening.submittedAt || screening.createdAt)}
           </p>
         </div>
@@ -429,7 +429,7 @@ export default function CaseReviewPage({ params }) {
 
       {/* ── Tabs ── */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="rounded-xl bg-gray-100 p-1 w-full grid grid-cols-4">
+        <TabsList className="rounded-xl bg-gray-100 p-1 w-full grid grid-cols-5">
           <TabsTrigger value="overview" className="rounded-lg text-sm">
             Overview
           </TabsTrigger>
@@ -442,6 +442,7 @@ export default function CaseReviewPage({ params }) {
           <TabsTrigger value="review" className="rounded-lg text-sm">
             Clinical Review
           </TabsTrigger>
+          <TabsTrigger value="therapy">Therapy Plan</TabsTrigger>
         </TabsList>
 
         {/* ────────── OVERVIEW ────────── */}
@@ -864,6 +865,9 @@ export default function CaseReviewPage({ params }) {
             &ldquo;Complete & Action&rdquo; finalises the case and updates its
             status. Clinical notes are required.
           </p>
+        </TabsContent>
+        <TabsContent value="therapy">
+          <TherapyPlanTab screening={screening} />
         </TabsContent>
       </Tabs>
 

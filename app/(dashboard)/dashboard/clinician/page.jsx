@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
+import TherapyAlertsPanel from "../components/TherapyAlertsPanel";
+
 
 // ── Skeletons ──────────────────────────────────────────────────────────────
 function Skeleton({ className }) {
@@ -285,6 +287,9 @@ export default function ClinicianDashboard() {
           Analytics
         </Button>
       </div>
+
+      {/* ── Therapy Alerts ── */}
+      <TherapyAlertsPanel />
 
       {/* ── Tabs ── */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>

@@ -9,7 +9,8 @@ import ClinicianGuard from "./ClinicianGuard";
 const NAV_LINKS = [
   { href: "/dashboard/clinician",           label: "Cases"     },
   { href: "/dashboard/clinician/analytics", label: "Analytics" },
-  { href: "/dashboard/parent",              label: "Patients"  },
+  { href: "/dashboard/clinician/therapy-overview", label: "Therapy"  },
+  { href: "/dashboard/parent",              label: "Screen a Child"  },
 ];
 
 export default function ClinicianDashboardLayout({ children }) {

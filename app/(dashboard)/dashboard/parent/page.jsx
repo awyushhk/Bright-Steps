@@ -4,39 +4,27 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogDescription,
+  DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   Plus, User, Calendar, ClipboardList, AlertCircle,
   Trash2, CheckCircle, Activity, Stethoscope, Eye,
+  Sparkles, TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { calculateAge, formatDate } from "@/lib/utils";
 
-// ── Skeleton primitives ──
 function Skeleton({ className }) {
   return <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />;
 }
@@ -48,9 +36,7 @@ function StatCardSkeleton() {
         <Skeleton className="h-4 w-28" />
         <Skeleton className="h-4 w-4 rounded-full" />
       </CardHeader>
-      <CardContent>
-        <Skeleton className="h-8 w-12" />
-      </CardContent>
+      <CardContent><Skeleton className="h-8 w-12" /></CardContent>
     </Card>
   );
 }
@@ -80,7 +66,6 @@ function ChildCardSkeleton() {
   );
 }
 
-// ── Clinician action config ──
 const ACTION_CONFIG = {
   referral: {
     label: "Refer to Specialist",
@@ -117,19 +102,23 @@ const ACTION_CONFIG = {
   },
 };
 
+const PROGRESS_CONFIG = {
+  improving:  { color: "text-emerald-600", bg: "bg-emerald-100", label: "Improving"  },
+  stagnant:   { color: "text-amber-600",   bg: "bg-amber-100",   label: "Stagnant"   },
+  regressing: { color: "text-rose-600",    bg: "bg-rose-100",    label: "Regressing" },
+};
+
 export default function ParentDashboard() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  const [children, setChildren] = useState([]);
-  const [screenings, setScreenings] = useState({});
-  const [isAddingChild, setIsAddingChild] = useState(false);
-  const [dataLoading, setDataLoading] = useState(true);
-  const [newChild, setNewChild] = useState({
-    name: "",
-    dateOfBirth: "",
-    gender: "male",
-  });
+  const [children, setChildren]         = useState([]);
+  const [screenings, setScreenings]     = useState({});
+  const [therapyPlans, setTherapyPlans] = useState({});   // childId → latest active plan
+  const [latestProgress, setLatestProgress] = useState({}); // planId → latest progress
+  const [isAddingChild, setIsAddingChild]   = useState(false);
+  const [dataLoading, setDataLoading]       = useState(true);
+  const [newChild, setNewChild] = useState({ name: "", dateOfBirth: "", gender: "male" });
 
   useEffect(() => {
     if (!isLoaded || !user) return;
@@ -144,13 +133,32 @@ export default function ParentDashboard() {
       setChildren(childList);
 
       const screeningsMap = {};
+      const plansMap      = {};
+      const progressMap   = {};
+
       await Promise.all(
         childList.map(async (child) => {
-          const sRes = await fetch(`/api/screenings?childId=${child.id}`);
+          const [sRes, pRes] = await Promise.all([
+            fetch(`/api/screenings?childId=${child.id}`),
+            fetch(`/api/therapy/plans?childId=${child.id}`),
+          ]);
           screeningsMap[child.id] = await sRes.json();
+          const plans = await pRes.json();
+          const activePlan = Array.isArray(plans)
+            ? plans.find(p => p.status === "active") ?? null
+            : null;
+          plansMap[child.id] = activePlan;
+
+          // Fetch latest progress for the active plan
+          if (activePlan) {
+            const progRes = await fetch(`/api/therapy/progress?planId=${activePlan.id}&latest=true`);
+            progressMap[activePlan.id] = await progRes.json();
+          }
         }),
       );
       setScreenings(screeningsMap);
+      setTherapyPlans(plansMap);
+      setLatestProgress(progressMap);
     } catch (err) {
       console.error("Failed to load data:", err);
     } finally {
@@ -169,10 +177,11 @@ export default function ParentDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newChild),
       });
-      if (!res.ok) throw new Error("Failed to add child");
+      if (!res.ok) throw new Error();
       const child = await res.json();
       setChildren([...children, child]);
       setScreenings({ ...screenings, [child.id]: [] });
+      setTherapyPlans({ ...therapyPlans, [child.id]: null });
       setNewChild({ name: "", dateOfBirth: "", gender: "male" });
       setIsAddingChild(false);
       toast.success(`${child.name} added successfully`);
@@ -185,11 +194,14 @@ export default function ParentDashboard() {
     if (!confirm(`Are you sure you want to delete ${childName}? This will also delete all their screenings.`)) return;
     try {
       const res = await fetch(`/api/children/${childId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
-      setChildren(children.filter((c) => c.id !== childId));
-      const updated = { ...screenings };
-      delete updated[childId];
-      setScreenings(updated);
+      if (!res.ok) throw new Error();
+      setChildren(children.filter(c => c.id !== childId));
+      const updatedS = { ...screenings };
+      const updatedP = { ...therapyPlans };
+      delete updatedS[childId];
+      delete updatedP[childId];
+      setScreenings(updatedS);
+      setTherapyPlans(updatedP);
       toast.success(`${childName} removed`);
     } catch {
       toast.error("Failed to delete child");
@@ -215,14 +227,13 @@ export default function ParentDashboard() {
 
   return (
     <div className="space-y-8">
+
       {/* Welcome */}
       <div>
         <h2 className="text-3xl font-bold mb-2">
           Welcome, {user?.firstName || user?.emailAddresses[0]?.emailAddress}!
         </h2>
-        <p className="text-gray-600">
-          Manage your children and track their developmental screenings
-        </p>
+        <p className="text-gray-600">Manage your children and track their developmental screenings</p>
       </div>
 
       {/* Stats */}
@@ -258,9 +269,7 @@ export default function ParentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {Object.values(screenings).filter(
-                    (s) => s[0]?.riskAssessment?.level === "high"
-                  ).length}
+                  {Object.values(screenings).filter(s => s[0]?.riskAssessment?.level === "high").length}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">children flagged high risk</p>
               </CardContent>
@@ -269,15 +278,12 @@ export default function ParentDashboard() {
         )}
       </div>
 
-      {/* Add Child header */}
+      {/* Add Child */}
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-bold">Your Children</h3>
         <Dialog open={isAddingChild} onOpenChange={setIsAddingChild}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Child
-            </Button>
+            <Button><Plus className="h-4 w-4 mr-2" />Add Child</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -287,29 +293,18 @@ export default function ParentDashboard() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Child&apos;s Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter name"
-                  value={newChild.name}
-                  onChange={(e) => setNewChild({ ...newChild, name: e.target.value })}
-                />
+                <Input id="name" placeholder="Enter name" value={newChild.name}
+                  onChange={e => setNewChild({ ...newChild, name: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dob">Date of Birth</Label>
-                <Input
-                  id="dob"
-                  type="date"
-                  value={newChild.dateOfBirth}
-                  onChange={(e) => setNewChild({ ...newChild, dateOfBirth: e.target.value })}
-                  max={new Date().toISOString().split("T")[0]}
-                />
+                <Input id="dob" type="date" value={newChild.dateOfBirth}
+                  onChange={e => setNewChild({ ...newChild, dateOfBirth: e.target.value })}
+                  max={new Date().toISOString().split("T")[0]} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender</Label>
-                <Select
-                  value={newChild.gender}
-                  onValueChange={(value) => setNewChild({ ...newChild, gender: value })}
-                >
+                <Select value={newChild.gender} onValueChange={v => setNewChild({ ...newChild, gender: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="male">Male</SelectItem>
@@ -330,8 +325,7 @@ export default function ParentDashboard() {
       {/* Children List */}
       {dataLoading ? (
         <div className="grid md:grid-cols-2 gap-6">
-          <ChildCardSkeleton />
-          <ChildCardSkeleton />
+          <ChildCardSkeleton /><ChildCardSkeleton />
         </div>
       ) : children.length === 0 ? (
         <Card>
@@ -340,22 +334,24 @@ export default function ParentDashboard() {
             <h3 className="text-xl font-semibold mb-2">No children added yet</h3>
             <p className="text-gray-500 mb-4">Add a child to start developmental screening</p>
             <Button onClick={() => setIsAddingChild(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Your First Child
+              <Plus className="h-4 w-4 mr-2" />Add Your First Child
             </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="grid md:grid-cols-2 gap-6">
-          {children.map((child) => {
+          {children.map(child => {
             const childScreenings = screenings[child.id] || [];
             const latestScreening = childScreenings[0];
-            const age = calculateAge(child.dateOfBirth);
+            const age             = calculateAge(child.dateOfBirth);
+            const activePlan      = therapyPlans[child.id];
+            const planProgress    = activePlan ? latestProgress[activePlan.id] : null;
+            const progressCfg     = planProgress ? PROGRESS_CONFIG[planProgress.status] : null;
 
             const clinicianReview = latestScreening?.clinicianReview;
-            const isActioned = latestScreening?.status === "actioned" && clinicianReview?.action;
-            const actionCfg = isActioned ? ACTION_CONFIG[clinicianReview.action] : null;
-            const ActionIcon = actionCfg?.icon;
+            const isActioned      = latestScreening?.status === "actioned" && clinicianReview?.action;
+            const actionCfg       = isActioned ? ACTION_CONFIG[clinicianReview.action] : null;
+            const ActionIcon      = actionCfg?.icon;
 
             return (
               <Card
@@ -381,6 +377,11 @@ export default function ParentDashboard() {
                           ✓ Clinician Reviewed
                         </span>
                       )}
+                      {activePlan && (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                          ✦ Therapy Active
+                        </span>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -394,6 +395,46 @@ export default function ParentDashboard() {
                     <ClipboardList className="h-4 w-4 mr-2" />
                     {childScreenings.length} screening{childScreenings.length !== 1 ? "s" : ""} completed
                   </div>
+
+                  {/* ── Active Therapy Plan Banner ── */}
+                  {activePlan && (
+                    <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Sparkles className="h-4 w-4 text-indigo-600 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-indigo-800 truncate">{activePlan.title}</p>
+                            <p className="text-xs text-indigo-500">
+                              {activePlan.frequency}
+                              {activePlan.therapyTypes?.[0] && ` • ${activePlan.therapyTypes[0].split("(")[0].trim()}`}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs px-3 flex-shrink-0"
+                          onClick={() => router.push(`/dashboard/parent/therapy/${activePlan.id}`)}
+                        >
+                          View Plan
+                        </Button>
+                      </div>
+
+                      {/* Progress status inside plan banner */}
+                      {progressCfg && planProgress && (
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${progressCfg.bg}`}>
+                          <TrendingUp className={`h-3.5 w-3.5 flex-shrink-0 ${progressCfg.color}`} />
+                          <span className={`text-xs font-semibold ${progressCfg.color}`}>
+                            Progress: {progressCfg.label}
+                          </span>
+                          {planProgress.score != null && (
+                            <span className="text-xs text-gray-400 ml-auto">
+                              {planProgress.score.toFixed(1)}/10
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* ── Clinician Decision Banner ── */}
                   {isActioned && actionCfg && ActionIcon && (
@@ -409,9 +450,7 @@ export default function ParentDashboard() {
                       </p>
                       {clinicianReview.notes && (
                         <div className={`mt-2 pt-2 border-t ${actionCfg.noteBorder}`}>
-                          <p className={`text-xs font-semibold mb-0.5 ${actionCfg.textColor} opacity-70`}>
-                            Clinician Notes:
-                          </p>
+                          <p className={`text-xs font-semibold mb-0.5 ${actionCfg.textColor} opacity-70`}>Clinician Notes:</p>
                           <p className={`text-xs leading-relaxed ${actionCfg.textColor} opacity-75 line-clamp-3`}>
                             {clinicianReview.notes}
                           </p>
@@ -425,7 +464,7 @@ export default function ParentDashboard() {
                     </div>
                   )}
 
-                  {/* ── Awaiting review notice ── */}
+                  {/* ── Awaiting review ── */}
                   {latestScreening && !isActioned && ["submitted", "under_review"].includes(latestScreening.status) && (
                     <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 flex items-center gap-2">
                       <Eye className="h-4 w-4 text-blue-500 flex-shrink-0" />
@@ -437,11 +476,10 @@ export default function ParentDashboard() {
                     </div>
                   )}
 
-                  {/* Actions */}
+                  {/* ── Action buttons ── */}
                   <div className="pt-2 flex space-x-2">
                     <Button
                       className="flex-1"
-                      onMouseEnter={() => router.prefetch(`/dashboard/parent/screening/${child.id}`)}
                       onClick={() => router.push(`/dashboard/parent/screening/${child.id}`)}
                     >
                       New Screening
@@ -449,7 +487,6 @@ export default function ParentDashboard() {
                     {childScreenings.length > 0 && (
                       <Button
                         variant="outline"
-                        onMouseEnter={() => router.prefetch(`/dashboard/parent/screening/result/${latestScreening.id}`)}
                         onClick={() => router.push(`/dashboard/parent/screening/result/${latestScreening.id}`)}
                       >
                         View Latest
