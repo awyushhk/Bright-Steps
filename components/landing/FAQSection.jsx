@@ -48,9 +48,6 @@ export const FAQSection = () => {
           <h2 className="font-heading font-bold text-3xl md:text-5xl text-white">
             Frequently Asked <span className="text-primary">Questions</span>
           </h2>
-          <p className="text-white/70 text-lg mt-4 max-w-3xl mx-auto">
-            Everything you need to know about how Bright Steps supports your family's journey.
-          </p>
         </div>
 
         <motion.div

@@ -33,8 +33,8 @@ export default function BrightStepsHome() {
           <ServiceTiles />
           <ReassuranceCallout />
           <HowItWorks />
-          <PlatformCore />
           <AboutASD />
+          <PlatformCore />
           <FAQSection />
           <BrandStatement />
         </main>
