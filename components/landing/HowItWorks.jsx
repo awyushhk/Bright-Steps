@@ -10,7 +10,7 @@ export const HowItWorks = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="font-heading font-bold text-4xl md:text-5xl text-ink mb-6 tracking-tight">
-            How Bright Steps <span className="text-primary">Works</span>
+            Get Results in <span className="text-primary">3 Simple Steps</span>
           </h2>
         </div>
 

@@ -37,13 +37,13 @@ export const Header = () => {
             { name: "About ASD", href: "#about-asd" },
             { name: "FAQs", href: "#faq" },
           ].map((item) => (
-            <Link
+            <a
               key={item.name}
               href={item.href}
-              className="text-base font-semibold text-muted hover:text-primary transition-colors"
+              className="text-base font-semibold text-muted hover:text-primary transition-colors cursor-pointer"
             >
               {item.name}
-            </Link>
+            </a>
           ))}
         </nav>
 

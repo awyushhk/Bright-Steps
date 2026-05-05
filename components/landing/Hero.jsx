@@ -63,12 +63,12 @@ export const Hero = () => {
             >
               {isLoggedIn ? "Go to Dashboard" : "Begin Screening"} <ChevronRight size={18} />
             </Link>
-            <Link
+            <a
               href="#how-it-works"
               className="bg-transparent border-2 border-white/80 hover:bg-white hover:text-ink text-white px-8 py-4 rounded-sm text-base font-semibold text-center transition-all"
             >
               How It Works
-            </Link>
+            </a>
           </motion.div>
         </motion.div>
       </div>

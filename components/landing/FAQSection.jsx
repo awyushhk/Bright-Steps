@@ -7,6 +7,8 @@ import { ParallaxSection } from "./ParallaxSection";
 import { fadeInUp, staggerContainer } from "./animations";
 
 export const FAQSection = () => {
+  const [openIndex, setOpenIndex] = useState(null);
+
   const faqs = [
     {
       q: "At what age can I start screening my child?",
@@ -59,7 +61,12 @@ export const FAQSection = () => {
           variants={staggerContainer}
         >
           {faqs.map((faq, idx) => (
-            <FAQItem key={idx} faq={faq} />
+            <FAQItem 
+              key={idx} 
+              faq={faq} 
+              isOpen={openIndex === idx}
+              onToggle={() => setOpenIndex(openIndex === idx ? null : idx)}
+            />
           ))}
         </motion.div>
       </div>
@@ -67,13 +74,11 @@ export const FAQSection = () => {
   );
 };
 
-const FAQItem = ({ faq }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+const FAQItem = ({ faq, isOpen, onToggle }) => {
   return (
     <motion.div variants={fadeInUp} className="bg-white/10 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden transition-colors hover:bg-white/15">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
         className="w-full text-left px-6 py-5 flex items-center justify-between focus:outline-none"
       >
         <h3 className="font-heading font-bold text-lg md:text-xl text-white pr-8">
