@@ -14,7 +14,7 @@ export const AboutASD = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="relative order-2 lg:order-1 h-full min-h-[500px]"
+            className="relative order-2 lg:order-1 h-full min-h-[400px]"
           >
             <div className="relative rounded-2xl overflow-hidden shadow-xl h-full border border-black/5">
               <img
@@ -29,13 +29,13 @@ export const AboutASD = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5, duration: 0.6 }}
-              className="absolute -bottom-6 -right-6 md:-right-10 bg-white p-6 rounded-2xl shadow-2xl border border-surface max-w-[280px]"
+              className="absolute -bottom-4 -right-4 md:-right-6 bg-white p-4 rounded-2xl shadow-2xl border border-surface max-w-[240px]"
             >
               <div className="flex items-center gap-4">
                 <div className="bg-primary/10 p-3 rounded-full text-primary shrink-0">
                   <Users size={24} />
                 </div>
-                <h4 className="font-heading font-bold text-ink leading-tight">
+                <h4 className="font-heading font-bold text-ink text-sm leading-tight">
                   1 in 36 children are diagnosed with ASD
                 </h4>
               </div>
@@ -50,15 +50,16 @@ export const AboutASD = () => {
             className="order-1 lg:order-2"
           >
             <h2 className="font-heading font-bold text-3xl md:text-5xl text-ink mb-6">
-              What is <span className="text-primary">Autism Spectrum Disorder?</span>
+              What is{" "}
+              <span className="text-primary">Autism Spectrum Disorder?</span>
             </h2>
-            <p className="text-lg text-muted leading-relaxed mb-8">
+            <p className="text-base text-muted leading-relaxed mb-6">
               Autism spectrum disorder is a developmental condition that can
               affect communication, behavior, social interaction, and how a
               child experiences the world. Every child develops differently, and
               noticing signs early can help families seek support sooner.
             </p>
-            <ul className="space-y-6">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 "Early detection can support better long-term outcomes",
                 "Signs may appear in early childhood",
@@ -67,10 +68,10 @@ export const AboutASD = () => {
               ].map((bullet, idx) => (
                 <li
                   key={idx}
-                  className="flex items-center gap-4 bg-white p-5 rounded-xl shadow-sm border border-black/5"
+                  className="flex items-center gap-4 bg-white p-5 rounded-xl shadow-sm border border-black/5 hover:shadow-md transition-all"
                 >
                   <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0"></div>
-                  <span className="text-ink font-medium text-lg leading-snug">
+                  <span className="text-ink font-semibold text-base leading-snug">
                     {bullet}
                   </span>
                 </li>
