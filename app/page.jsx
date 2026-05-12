@@ -16,7 +16,7 @@ import { Footer } from "@/components/landing/Footer";
 
 export default function BrightStepsHome() {
   return (
-    <ReactLenis root options={{ smoothTouch: true }}>
+    <ReactLenis root options={{ smoothTouch: true, touchMultiplier: 2 }}>
       <div className="bg-background text-ink font-sans min-h-screen selection:bg-primary/20 selection:text-primary-dark">
         {/* Accessibility Skip Link */}
         <a

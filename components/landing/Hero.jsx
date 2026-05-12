@@ -18,10 +18,10 @@ export const Hero = () => {
   const heroOpacity = useTransform(scrollY, [0, 500], [1, 0.1]);
 
   return (
-    <section className="relative h-[90vh] min-h-[600px] overflow-hidden flex items-center bg-ink">
+    <section className="relative h-[85vh] md:h-[90vh] min-h-[500px] md:min-h-[600px] overflow-hidden flex items-center bg-ink">
       {/* Parallax Background */}
       <motion.div
-        className="absolute inset-0 z-0 h-[130%] -top-[15%]"
+        className="absolute inset-0 z-0 h-[130%] -top-[15%] will-change-transform"
         style={{ y: heroY, opacity: heroOpacity }}
       >
         <div className="absolute inset-0 bg-ink/50 z-10" />
@@ -32,7 +32,7 @@ export const Hero = () => {
         />
       </motion.div>
 
-      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-20">
         <motion.div
           className="max-w-3xl text-white"
           initial="hidden"
@@ -41,13 +41,13 @@ export const Hero = () => {
         >
           <motion.h1
             variants={fadeInUp}
-            className="font-heading font-bold text-4xl md:text-6xl leading-tight mb-6 text-white text-shadow-sm"
+            className="font-heading font-bold text-3xl md:text-5xl lg:text-6xl leading-tight mb-6 text-white text-shadow-sm"
           >
             Notice <span className="text-primary">Early Signs.</span> <br /> Take the Next Step with Confidence.
           </motion.h1>
           <motion.p
             variants={fadeInUp}
-            className="text-lg md:text-xl font-medium mb-10 text-white/90 max-w-2xl leading-relaxed"
+            className="text-lg md:text-xl font-medium mb-8 md:mb-10 text-white/90 max-w-2xl leading-relaxed"
           >
             Bright Steps helps families identify early developmental
             patterns with simple guidance and at home observations, so you

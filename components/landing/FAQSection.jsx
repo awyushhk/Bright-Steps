@@ -40,12 +40,12 @@ export const FAQSection = () => {
     <ParallaxSection
       bgImage="https://images.unsplash.com/photo-1604552781095-388b94f80281?q=80&w=2070&auto=format&fit=crop"
       overlayClass="bg-black/60"
-      className="py-32"
+      className="py-20 md:py-32"
       id="faq"
     >
       <div className="relative z-20 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="font-heading font-bold text-3xl md:text-5xl text-white">
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-white">
             Frequently Asked <span className="text-primary">Questions</span>
           </h2>
         </div>

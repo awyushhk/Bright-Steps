@@ -6,10 +6,10 @@ import { fadeInUp, staggerContainer } from "./animations";
 
 export const HowItWorks = () => {
   return (
-    <section id="how-it-works" className="py-24 bg-white overflow-hidden">
+    <section id="how-it-works" className="py-16 md:py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="font-heading font-bold text-4xl md:text-5xl text-ink mb-6 tracking-tight">
+          <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-ink mb-6 tracking-tight">
             Get Results in <span className="text-primary">3 Simple Steps</span>
           </h2>
         </div>
@@ -42,7 +42,7 @@ export const HowItWorks = () => {
             },
           ].map((item) => (
             <motion.div key={item.step} variants={fadeInUp}>
-              <div className="group relative rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block hover:-translate-y-1 h-[400px]">
+              <div className="group relative rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block hover:-translate-y-1 h-[300px] md:h-[400px]">
                 <img
                   src={item.img}
                   alt={item.title}

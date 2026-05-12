@@ -6,16 +6,16 @@ import { CheckCircle2 } from "lucide-react";
 
 export const PlatformCore = () => {
   return (
-    <section id="platform-core" className="py-24 bg-surface overflow-hidden">
+    <section id="platform-core" className="py-16 md:py-24 bg-surface overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
           {/* Left Side: AI Behavioral Insights Graphic */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="bg-white p-8 rounded-2xl border border-black/5 shadow-xl relative overflow-hidden order-2 lg:order-1"
+            className="bg-white p-6 md:p-8 rounded-2xl border border-black/5 shadow-xl relative overflow-hidden order-2 lg:order-1"
           >
             <div className="mb-8">
               <h4 className="text-ink font-heading font-bold text-xl">
@@ -77,7 +77,7 @@ export const PlatformCore = () => {
             transition={{ duration: 0.8 }}
             className="order-1 lg:order-2"
           >
-            <h2 className="font-heading font-bold text-3xl md:text-5xl text-ink mb-6 leading-tight">
+            <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-ink mb-6 leading-tight">
               Built on Clinical Standards
             </h2>
             <div className="space-y-6 text-muted text-lg leading-relaxed mb-8">

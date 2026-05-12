@@ -21,7 +21,7 @@ export const ParallaxSection = ({
   return (
     <section ref={ref} id={id} className={`relative overflow-hidden ${className}`}>
       <motion.div
-        className="absolute inset-0 z-0 h-[170%] -top-[35%]"
+        className="absolute inset-0 z-0 h-[170%] -top-[35%] will-change-transform"
         style={{ y }}
       >
         <img src={bgImage} alt="" className="w-full h-full object-cover" />

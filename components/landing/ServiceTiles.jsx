@@ -8,10 +8,10 @@ import { fadeInUp, staggerContainer } from "./animations";
 
 export const ServiceTiles = () => {
   return (
-    <section id="services" className="py-24 bg-surface">
+    <section id="services" className="py-16 md:py-24 bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="font-heading font-bold text-4xl md:text-5xl text-ink mb-6 tracking-tight">
+          <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-ink mb-6 tracking-tight">
             What We <span className="text-primary">Offer</span>
           </h2>
         </div>
@@ -26,7 +26,7 @@ export const ServiceTiles = () => {
           {/* Tile 1 */}
           <motion.div variants={fadeInUp}>
             <div
-              className="group relative rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block hover:-translate-y-1 h-[400px]"
+              className="group relative rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block hover:-translate-y-1 h-[300px] md:h-[400px]"
             >
               <img
                 src="https://images.unsplash.com/photo-1584697964328-b1e7f63dca95?q=80&w=2070&auto=format&fit=crop"
@@ -50,7 +50,7 @@ export const ServiceTiles = () => {
           {/* Tile 2 */}
           <motion.div variants={fadeInUp}>
             <div
-              className="group relative rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block hover:-translate-y-1 h-[400px]"
+              className="group relative rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block hover:-translate-y-1 h-[300px] md:h-[400px]"
             >
               <img
                 src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=2040&auto=format&fit=crop"
@@ -74,7 +74,7 @@ export const ServiceTiles = () => {
           {/* Tile 3 */}
           <motion.div variants={fadeInUp}>
             <div
-              className="group relative rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block hover:-translate-y-1 h-[400px]"
+              className="group relative rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block hover:-translate-y-1 h-[300px] md:h-[400px]"
             >
               <img
                 src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=2070&auto=format&fit=crop"

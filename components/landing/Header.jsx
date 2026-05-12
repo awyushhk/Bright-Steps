@@ -100,29 +100,29 @@ export const Header = () => {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="lg:hidden bg-white border-b border-surface overflow-hidden"
           >
-            <div className="px-4 pt-2 pb-6 space-y-2">
+            <div className="px-4 pt-2 pb-4 space-y-1">
               {navItems.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block px-3 py-4 text-lg font-semibold text-muted hover:text-primary hover:bg-surface/50 rounded-lg transition-colors"
+                  className="block px-3 py-2.5 text-base font-semibold text-muted hover:text-primary hover:bg-surface/50 rounded-lg transition-colors"
                 >
                   {item.name}
                 </a>
               ))}
-              <hr className="border-surface my-4" />
-              <div className="pt-2 space-y-4">
+              <hr className="border-surface my-2" />
+              <div className="pt-2 space-y-2">
                 {isLoggedIn ? (
                   <>
                     <Link
                       href="/dashboard"
                       onClick={() => setIsMenuOpen(false)}
-                      className="block px-3 py-4 text-lg font-semibold text-muted hover:text-primary transition-colors"
+                      className="block px-3 py-2.5 text-base font-semibold text-muted hover:text-primary transition-colors"
                     >
                       Dashboard
                     </Link>
-                    <div className="px-3">
+                    <div className="px-3 py-1">
                       <UserButton afterSignOutUrl="/" />
                     </div>
                   </>
@@ -131,14 +131,14 @@ export const Header = () => {
                     <Link
                       href="/sign-in"
                       onClick={() => setIsMenuOpen(false)}
-                      className="block px-3 py-4 text-lg font-semibold text-muted hover:text-primary transition-colors"
+                      className="block px-3 py-2.5 text-base font-semibold text-muted hover:text-primary transition-colors"
                     >
                       Sign In
                     </Link>
                     <Link
                       href="/sign-up"
                       onClick={() => setIsMenuOpen(false)}
-                      className="block w-full bg-primary hover:bg-primary-dark text-white px-6 py-4 rounded-sm text-center text-lg font-bold transition-all shadow-md"
+                      className="block w-full bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-sm text-center text-base font-bold transition-all shadow-md mt-2"
                     >
                       Get Started
                     </Link>

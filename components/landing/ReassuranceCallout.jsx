@@ -15,7 +15,7 @@ export const ReassuranceCallout = () => {
     <ParallaxSection
       bgImage="https://images.unsplash.com/photo-1662852920632-3a95ec8917cc?q=80&w=2070&auto=format&fit=crop"
       overlayClass="bg-black/40"
-      className="py-52 min-h-[800px] flex items-center justify-center"
+      className="py-32 md:py-52 min-h-[500px] md:min-h-[800px] flex items-center justify-center"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
         <motion.div
@@ -27,7 +27,7 @@ export const ReassuranceCallout = () => {
           {/* Preserved user's specific copy */}
           <motion.h2
             variants={fadeInUp}
-            className="font-heading font-bold text-4xl md:text-6xl mb-10 leading-tight"
+            className="font-heading font-bold text-3xl md:text-5xl lg:text-6xl mb-8 md:mb-10 leading-tight"
           >
             The early signs of autism are easy to miss. <br /> No need to
             wait and see.

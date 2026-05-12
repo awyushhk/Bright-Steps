@@ -10,10 +10,10 @@ export const AboutASD = () => {
       id="about-asd"
       bgImage="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=2070&auto=format&fit=crop"
       overlayClass="bg-black/50"
-      className="py-48"
+      className="py-24 md:py-48"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
           {/* Left Side: About ASD Copy */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -21,10 +21,10 @@ export const AboutASD = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="font-heading font-bold text-4xl md:text-5xl text-white mb-8">
+            <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-white mb-6 md:mb-8">
               What is <span className="text-primary-foreground">Autism Spectrum Disorder?</span>
             </h2>
-            <p className="text-xl text-white/90 leading-relaxed mb-6">
+            <p className="text-lg md:text-xl text-white/90 leading-relaxed mb-6">
               Autism spectrum disorder is a developmental condition that can
               affect communication, behavior, social interaction, and how a
               child experiences the world. Every child develops differently, and
