@@ -7,7 +7,6 @@ const nextConfig = {
     },
   },
   serverExternalPackages: ['cloudinary'],
-  middlewareClientMaxBodySize: '52mb',
 };
 
 export default nextConfig;

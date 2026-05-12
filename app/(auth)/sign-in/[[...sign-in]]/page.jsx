@@ -82,6 +82,13 @@ export default function SignInPage() {
           <div className="flex justify-center lg:justify-end">
             <div className="w-full max-w-md">
               <SignIn
+                localization={{
+                  signIn: {
+                    start: {
+                      title: "Sign in to Bright Steps",
+                    },
+                  },
+                }}
                 appearance={{
                   elements: {
                     rootBox: "w-full",

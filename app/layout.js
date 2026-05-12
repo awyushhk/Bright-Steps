@@ -24,7 +24,20 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      localization={{
+        signIn: {
+          start: {
+            title: "Sign in to Bright Steps",
+          },
+        },
+        signUp: {
+          start: {
+            title: "Create your account",
+          },
+        },
+      }}
+    >
       <html lang="en">
         <body
           className={`${inter.variable} ${manrope.variable} ${geistMono.variable} antialiased`}

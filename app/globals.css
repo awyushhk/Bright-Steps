@@ -188,3 +188,16 @@ html {
     font-family: var(--font-heading);
   }
 }
+
+/* Hide Clerk Watermark and Branding - Targeted Version */
+.cl-watermark,
+.cl-internal-b3al4t,
+.cl-internal-1dauvpw,
+.cl-internal-1v7v8v7 {
+  display: none !important;
+}
+
+/* Ensure the custom switch link we added is visible */
+.mt-6.text-center.text-sm.text-slate-600 {
+  display: block !important;
+}

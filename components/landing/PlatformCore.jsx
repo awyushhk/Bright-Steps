@@ -63,9 +63,8 @@ export const PlatformCore = () => {
             <div className="mt-8 bg-surface p-4 rounded-lg border border-black/5 flex items-center gap-3">
               <CheckCircle2 className="shrink-0 text-primary" size={18} />
               <p className="text-muted text-sm leading-snug">
-                Our engine automatically scores key developmental markers from
-                your uploaded videos to provide a comprehensive behavioral
-                profile.
+                Our engine analyzes developmental markers from uploaded videos and
+                generates detailed behavioral insights automatically.
               </p>
             </div>
           </motion.div>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Brain } from "lucide-react";
+import { Brain, Mail, Linkedin, Github } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 
 export const Footer = () => {
@@ -23,15 +23,14 @@ export const Footer = () => {
               </span>
             </div>
             <p className="text-sm mt-4 max-w-[240px] leading-relaxed">
-              Empowering families with early autism screening and developmental support.
+              Empowering families with early autism screening and developmental
+              support.
             </p>
           </div>
 
           {/* Col 2 */}
           <div>
-            <h4 className="font-heading font-bold text-white mb-6">
-              Platform
-            </h4>
+            <h4 className="font-heading font-bold text-white mb-6">Platform</h4>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link
@@ -70,9 +69,7 @@ export const Footer = () => {
 
           {/* Col 3 */}
           <div>
-            <h4 className="font-heading font-bold text-white mb-6">
-              Account
-            </h4>
+            <h4 className="font-heading font-bold text-white mb-6">Account</h4>
             <ul className="space-y-3 text-sm">
               {isLoggedIn ? (
                 <li>
@@ -103,49 +100,60 @@ export const Footer = () => {
                   </li>
                 </>
               )}
-
             </ul>
           </div>
 
           {/* Col 4 */}
           <div>
             <h4 className="font-heading font-bold text-white mb-6">
-              Stay Connected
+              Get in Touch
             </h4>
-            <p className="text-sm mb-4">
-              Join our newsletter for updates and resources.
-            </p>
-            <form
-              className="flex mb-6"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <input
-                type="email"
-                placeholder="Email address"
-                className="bg-white/10 border border-white/20 text-white placeholder-white/50 px-4 py-3 rounded-l-sm text-sm w-full focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-              <button
-                type="submit"
-                className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-r-sm text-sm font-medium transition-colors whitespace-nowrap"
+            <div className="flex gap-5">
+              <a
+                href="mailto:gr8ayushkumar@gmail.com"
+                className="text-white/50 hover:text-white transition-colors p-1"
+                title="Email"
               >
-                Sign Up
-              </button>
-            </form>
+                <Mail size={22} />
+              </a>
+              <a
+                href="https://linkedin.com/in/ayush-kumar100"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/50 hover:text-white transition-colors p-1"
+                title="LinkedIn"
+              >
+                <Linkedin size={22} />
+              </a>
+              <a
+                href="https://github.com/awyushhk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/50 hover:text-white transition-colors p-1"
+                title="GitHub"
+              >
+                <Github size={22} />
+              </a>
+            </div>
           </div>
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs">
-            &copy; {new Date().getFullYear()} Bright Steps. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} Bright Steps. All rights reserved.
           </p>
-          <div className="flex gap-4 text-xs">
-            <Link
-              href="/terms"
-              className="hover:text-white transition-colors"
+          <div className="flex gap-6 text-xs items-center">
+            <a
+              href="https://linkedin.com/in/ayush-kumar100"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors flex items-center gap-1"
             >
-              Terms
-            </Link>
+              Made with ❤️ by{" "}
+              <span className="text-white font-medium underline underline-offset-4 decoration-white/20 hover:decoration-primary">
+                Ayush
+              </span>
+            </a>
           </div>
         </div>
       </div>

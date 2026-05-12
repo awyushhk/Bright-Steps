@@ -27,25 +27,25 @@ export default async function SignUpPage({ searchParams }) {
       </header>
 
       {/* Main */}
-      <main className="flex-1 flex items-center justify-center px-6 py-16">
-        <div className="w-full max-w-6xl">
+      <main className="flex-1 flex items-center justify-center px-6 py-8">
+        <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center">
 
-          {/* Role Selection */}
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
-              Create Your Account
-            </h2>
+          {/* Left Section - Role Selection & Info */}
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4 leading-tight">
+                Create Your Account
+              </h2>
+              <p className="text-lg text-slate-600">
+                Choose how you will be using BrightSteps
+              </p>
+            </div>
 
-            <p className="text-slate-600 mb-8">
-              Choose how you will be using BrightSteps
-            </p>
-
-            <div className="flex gap-6 justify-center max-w-2xl mx-auto">
-
+            <div className="flex flex-col gap-4">
               {/* Parent */}
               <Link
                 href="/sign-up?role=parent"
-                className={`flex-1 p-5 rounded-xl border-2 transition-all ${
+                className={`w-full p-4 rounded-xl border-2 transition-all ${
                   selectedRole === "parent"
                     ? "border-indigo-500 bg-indigo-50"
                     : "border-indigo-100 hover:border-indigo-300 bg-white"
@@ -82,7 +82,7 @@ export default async function SignUpPage({ searchParams }) {
               {/* Clinician */}
               <Link
                 href="/sign-up?role=clinician"
-                className={`flex-1 p-5 rounded-xl border-2 transition-all ${
+                className={`w-full p-4 rounded-xl border-2 transition-all ${
                   selectedRole === "clinician"
                     ? "border-indigo-500 bg-indigo-50"
                     : "border-indigo-100 hover:border-indigo-300 bg-white"
@@ -115,20 +115,39 @@ export default async function SignUpPage({ searchParams }) {
                   </div>
                 </div>
               </Link>
+            </div>
 
+            {/* Info Section */}
+            <div className="bg-white border border-indigo-100 rounded-xl p-5 shadow-sm">
+              <h3 className="font-semibold text-slate-900 mb-1">
+                {selectedRole === "parent"
+                  ? "For Parents and Guardians"
+                  : "For Healthcare Professionals"}
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {selectedRole === "parent"
+                  ? "Bright Steps helps you document early developmental behaviors through structured guidance and home observations."
+                  : "BrightSteps supports structured case review and organized screening workflows within clinical settings."}
+              </p>
             </div>
           </div>
 
-          {/* Clerk SignUp */}
-          <div className="flex justify-center">
+          {/* Right Section - Clerk SignUp */}
+          <div className="flex justify-center lg:justify-end">
             <div className="w-full max-w-md">
               <SignUp
                 unsafeMetadata={{ role: selectedRole }}
+                localization={{
+                  signUp: {
+                    start: {
+                      title: "Create your Bright Steps account",
+                    },
+                  },
+                }}
                 appearance={{
                   elements: {
                     rootBox: "w-full",
-                    card:
-                      "w-full shadow-lg border border-indigo-100",
+                    card: "w-full shadow-lg border border-indigo-100",
                     headerTitle: "text-slate-900",
                     headerSubtitle: "text-slate-500",
                     formButtonPrimary:
@@ -139,23 +158,6 @@ export default async function SignUpPage({ searchParams }) {
                 path="/sign-up"
                 signInUrl="/sign-in"
               />
-            </div>
-          </div>
-
-          {/* Info Section */}
-          <div className="mt-10 max-w-2xl mx-auto">
-            <div className="bg-white border border-indigo-100 rounded-xl p-6">
-              <h3 className="font-semibold text-slate-900 mb-2">
-                {selectedRole === "parent"
-                  ? "For Parents and Guardians"
-                  : "For Healthcare Professionals"}
-              </h3>
-
-              <p className="text-sm text-slate-600">
-                {selectedRole === "parent"
-                  ? "Bright Steps helps you document early developmental behaviors through structured guidance and home observations."
-                  : "BrightSteps supports structured case review and organized screening workflows within clinical settings."}
-              </p>
             </div>
           </div>
 
