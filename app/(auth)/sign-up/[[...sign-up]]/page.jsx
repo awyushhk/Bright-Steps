@@ -157,6 +157,7 @@ export default async function SignUpPage({ searchParams }) {
                 routing="path"
                 path="/sign-up"
                 signInUrl="/sign-in"
+                fallbackRedirectUrl="/dashboard"
               />
             </div>
           </div>
